@@ -1,0 +1,143 @@
+AWSTemplateFormatVersion: "2010-09-09"
+#
+#  Globals:
+# All the attributes defined under Globals will be added to all transformable, i.e. AWS::Serverless resources.
+# Policies are not supported for Globals and therefore need to be specified elsewhere. SAM does not support this for AWS::Serverless
+# so a solution create/use a role with the wanted policies.
+#
+Transform: 'AWS::Serverless-2016-10-31'
+Description: >-
+  sam-app
+Parameters:
+  #############################
+  ### Mandatory do not change ###
+  #############################
+  Zone:
+    Type: String
+  Site:
+    Type: String
+  Solution:
+    Type: String
+  Environment:
+    Type: String
+  Component:
+    Type: String
+  ComponentShortName:
+    Type: String
+    Default: "alt"
+  Version:
+    Type: String
+  RegionalPrefix: #Concatenation of ${solution}-${environment} to be used when isolating regional services
+    Type: String
+    Default: "tutorial-eu"
+  GlobalPrefix: #Concatenation of ${solution}-${site}-${environment} to be used when isolating global services
+    Type: String
+    Default: "tutorial-eu-north"
+
+  #############################
+  ### config.yml ###
+  #############################
+
+#Global values for lambdas
+Globals:
+  Function:
+    Runtime: java11
+    MemorySize: 1028
+    Timeout: 30
+    Environment:
+      Variables:
+        component: !Ref Component
+        componentShortName: !Ref ComponentShortName
+        version: !Ref Version
+        zone: !Ref Zone
+        site: !Ref Site
+        solution: !Ref Solution
+        environment: !Ref Environment
+
+Resources:
+  #Lambda Functions
+  SimpleLamda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Description:
+      FunctionName: !Sub "alt-SimpleLambda"
+      Handler: "com.nexer.tutorial.functions.SimpleLambdaFunction::handleRequest"
+      Role: !GetAtt SimpleLambdaUser.Arn
+# TODO: Add API Event here
+#      Events:
+#          ...
+
+  # Lambda Functions Roles #
+  SimpleLambdaUser:
+    Type: AWS::IAM::Role
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W11
+            reason: "We need * permission here to determine lambda storage"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action: 'sts:AssumeRole'
+          Effect: Allow
+          Principal:
+            Service:
+              - lambda.amazonaws.com
+              - apigateway.amazonaws.com
+      Policies:
+        - PolicyName: inline-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lambda:InvokeFunction'
+                Resource: "*"
+# TODO:
+Outputs:
+  HelloWorldApi:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  HelloWorldFunction:
+    Description: "Hello World Lambda Function ARN"
+    Value: !GetAtt HelloWorldFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: "Implicit IAM Role created for Hello World function"
+    Value: !GetAtt HelloWorldFunctionRole.Arn
+
+  #IAM Role
+  #Type: AWS::IAM::User
+  #Properties:
+  #  Groups:
+  #    - String
+  #  LoginProfile:
+  #    LoginProfile
+  #  ManagedPolicyArns:
+  #    - String
+  #  Path: String
+  #  PermissionsBoundary: String
+  #  Policies:
+  #    - Policy
+  #  Tags:
+  #    - Tag
+  #  UserName: String
+
+  #API
+#  SimpleLambdaAPI:
+#    Type: "AWS::ApiGateway::RestApi"
+#    Properties:
+#      Name: !Sub "alt-SimpleLambdaAPI"
+#      Parameters:
+#        endpointConfigurationTypes: REGIONAL
+#      Body:
+#        Fn::Transform:
+#          Name: AWS::Include
+#          Parameters:
+#            Location: "api.yml"
+
+#Outputs:
+#  SimpleLambdaApiId:
+#    Description: Reference of the API Gateway in this stack
+#    Value: !Ref SimpleLambdaAPI
+#    Export:
+#      Name: !Sub '${GlobalPrefix}-${ComponentShortName}-api-id'
