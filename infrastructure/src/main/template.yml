@@ -63,47 +63,117 @@ Resources:
       FunctionName: !Sub "alt-SimpleLambda"
       Handler: "com.nexer.tutorial.functions.SimpleLambdaFunction::handleRequest"
       Role: !GetAtt SimpleLambdaUser.Arn
-# TODO: Add API Event here
-#      Events:
-#          ...
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /helloWorld
+            Method: get
+
 
   # Lambda Functions Roles #
-  SimpleLambdaUser:
-    Type: AWS::IAM::Role
-    Metadata:
-      cfn_nag:
-        rules_to_suppress:
-          - id: W11
-            reason: "We need * permission here to determine lambda storage"
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-          Action: 'sts:AssumeRole'
-          Effect: Allow
-          Principal:
-            Service:
-              - lambda.amazonaws.com
-              - apigateway.amazonaws.com
-      Policies:
-        - PolicyName: inline-policy
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'lambda:InvokeFunction'
-                Resource: "*"
+ # SimpleLambdaUser:
+ #   Type: AWS::IAM::Role
+ #   Metadata:
+ #     cfn_nag:
+ #       rules_to_suppress:
+ #         - id: W11
+ #           reason: "We need * permission here to determine lambda storage"
+ #   Properties:
+ #     AssumeRolePolicyDocument:
+ #       Statement:
+ #         Action: 'sts:AssumeRole'
+ #         Effect: Allow
+ #         Principal:
+ #           Service:
+ #             - lambda.amazonaws.com
+ #             - apigateway.amazonaws.com
+ #     Policies:
+ #       - PolicyName: inline-policy
+ #         PolicyDocument:
+ #           Version: "2012-10-17"
+ #           Statement:
+ #             - Effect: Allow
+ #               Action:
+ #                 - 'lambda:InvokeFunction'
+ #               Resource: "*"
 # TODO:
-Outputs:
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: "Hello World Lambda Function ARN"
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: "Implicit IAM Role created for Hello World function"
-    Value: !GetAtt HelloWorldFunctionRole.Arn
+#Outputs:
+#  HelloWorldApi:
+#    Description: "API Gateway endpoint URL"
+#    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+#  HelloWorldFunction:
+#    Description: "Hello World Lambda Function ARN"
+#    Value: !GetAtt HelloWorldFunction.Arn
+#  HelloWorldFunctionIamRole:
+#    Description: "Implicit IAM Role created for Hello World function"
+#    Value: !GetAtt HelloWorldFunctionRole.Arn
+
+# DynamoDB Resource. Read more:
+  # --> https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
+  Resources:
+    albumStoreDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: "Album"
+            AttributeType: "S"
+          - AttributeName: "Artist"
+            AttributeType: "S"
+          - AttributeName: "Sales"
+            AttributeType: "N"
+          - AttributeName: "NumberOfSongs"
+            AttributeType: "N"
+        KeySchema:
+          - AttributeName: "Album"
+            KeyType: "HASH"
+          - AttributeName: "Artist"
+            KeyType: "RANGE"
+        ProvisionedThroughput:
+          ReadCapacityUnits: "5"
+          WriteCapacityUnits: "5"
+        TableName: "myTableName"
+        GlobalSecondaryIndexes:
+          - IndexName: "myGSI"
+            KeySchema:
+              - AttributeName: "Sales"
+                KeyType: "HASH"
+              - AttributeName: "Artist"
+                KeyType: "RANGE"
+            Projection:
+              NonKeyAttributes:
+                - "Album"
+                - "NumberOfSongs"
+              ProjectionType: "INCLUDE"
+            ProvisionedThroughput:
+              ReadCapacityUnits: "5"
+              WriteCapacityUnits: "5"
+          - IndexName: "myGSI2"
+            KeySchema:
+              - AttributeName: "NumberOfSongs"
+                KeyType: "HASH"
+              - AttributeName: "Sales"
+                KeyType: "RANGE"
+            Projection:
+              NonKeyAttributes:
+                - "Album"
+                - "Artist"
+              ProjectionType: "INCLUDE"
+            ProvisionedThroughput:
+              ReadCapacityUnits: "5"
+              WriteCapacityUnits: "5"
+        LocalSecondaryIndexes:
+          - IndexName: "myLSI"
+            KeySchema:
+              - AttributeName: "Album"
+                KeyType: "HASH"
+              - AttributeName: "Sales"
+                KeyType: "RANGE"
+            Projection:
+              NonKeyAttributes:
+                - "Artist"
+                - "NumberOfSongs"
+              ProjectionType: "INCLUDE"
+
 
   #IAM Role
   #Type: AWS::IAM::User
@@ -123,21 +193,21 @@ Outputs:
   #  UserName: String
 
   #API
-#  SimpleLambdaAPI:
-#    Type: "AWS::ApiGateway::RestApi"
-#    Properties:
-#      Name: !Sub "alt-SimpleLambdaAPI"
-#      Parameters:
-#        endpointConfigurationTypes: REGIONAL
-#      Body:
-#        Fn::Transform:
-#          Name: AWS::Include
-#          Parameters:
-#            Location: "api.yml"
+  SimpleLambdaAPI:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: !Sub "alt-SimpleLambdaAPI"
+      Parameters:
+        endpointConfigurationTypes: REGIONAL
+      Body:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: "api.yml"
 
-#Outputs:
-#  SimpleLambdaApiId:
-#    Description: Reference of the API Gateway in this stack
-#    Value: !Ref SimpleLambdaAPI
-#    Export:
-#      Name: !Sub '${GlobalPrefix}-${ComponentShortName}-api-id'
+Outputs:
+  SimpleLambdaApiId:
+    Description: Reference of the API Gateway in this stack
+    Value: !Ref SimpleLambdaAPI
+    Export:
+      Name: !Sub '${GlobalPrefix}-${ComponentShortName}-api-id'

@@ -27,9 +27,9 @@ public class SimpleLambdaFunction implements RequestHandler<Void, Void> {
 
       // TODO (Workshop 1):
       //  Get account settings
-      //  Publish total lambda storage to CloudWatch
-      //  Publish current usage of lambda storage to CloudWatch
-      //  Publish Remaining usage of lambda storage to CloudWatch
+      //  > Publish total lambda storage to CloudWatch
+      //  > Publish current usage of lambda storage to CloudWatch
+      //  > Publish Remaining usage of lambda storage to CloudWatch
       //  Hint: Use the commented out library GetAccountSettingsResponse together with the lambda client.
       //  you will also need an embeddedMetricsLogger
     } catch(Exception e) {
