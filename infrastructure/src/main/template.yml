@@ -62,12 +62,12 @@ Resources:
       Description:
       FunctionName: !Sub "alt-SimpleLambda"
       Handler: "com.nexer.tutorial.functions.SimpleLambdaFunction::handleRequest"
-      Role: !GetAtt SimpleLambdaUser.Arn
-        HelloWorld:
-          Type: Api
-          Properties:
-            Path: /helloWorld
-            Method: get
+#      Role: !GetAtt SimpleLambdaUser.Arn
+#        HelloWorld:
+#          Type: Api
+#          Properties:
+#            Path: /helloWorld
+#            Method: get
 
 
   # Lambda Functions Roles #
@@ -110,8 +110,7 @@ Resources:
 
 # DynamoDB Resource. Read more:
   # --> https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
-  Resources:
-    albumStoreDynamoDBTable:
+    myDynamoDBTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
@@ -193,21 +192,21 @@ Resources:
   #  UserName: String
 
   #API
-  SimpleLambdaAPI:
-    Type: "AWS::ApiGateway::RestApi"
-    Properties:
-      Name: !Sub "alt-SimpleLambdaAPI"
-      Parameters:
-        endpointConfigurationTypes: REGIONAL
-      Body:
-        Fn::Transform:
-          Name: AWS::Include
-          Parameters:
-            Location: "api.yml"
+#  SimpleLambdaAPI:
+#    Type: "AWS::ApiGateway::RestApi"
+#    Properties:
+#      Name: !Sub "alt-SimpleLambdaAPI"
+#      Parameters:
+#        endpointConfigurationTypes: REGIONAL
+#      Body:
+#        Fn::Transform:
+#          Name: AWS::Include
+#          Parameters:
+#            Location: "api.yml"
 
-Outputs:
-  SimpleLambdaApiId:
-    Description: Reference of the API Gateway in this stack
-    Value: !Ref SimpleLambdaAPI
-    Export:
-      Name: !Sub '${GlobalPrefix}-${ComponentShortName}-api-id'
+#Outputs:
+#  SimpleLambdaApiId:
+#    Description: Reference of the API Gateway in this stack
+#    Value: !Ref SimpleLambdaAPI
+#    Export:
+#      Name: !Sub '${GlobalPrefix}-${ComponentShortName}-api-id'
