@@ -12,20 +12,26 @@ import software.amazon.awssdk.services.lambda.LambdaClient;
 /**
  * This class showcases a simple lambda function
  */
-public class SimpleLambdaFunction implements RequestHandler<Void, Void> {
+public class SimpleLambdaFunction implements RequestHandler<Void, String> {
   private static final Logger LOG = LoggerFactory.getLogger(SimpleLambdaFunction.class);
   private static final SdkHttpClient httpClient = ApacheHttpClient.builder().build();
   private LambdaClient lambdaClient;
 
   @Override
-  public Void handleRequest(Void input, Context context) {
+  public String handleRequest(Void input, Context context) {
     if (lambdaClient == null) {
       lambdaClient = LambdaClient.builder().httpClient(httpClient).build();
     }
     try {
-      LOG.info("Hello World");
 
-      // TODO (Workshop 1):
+      String message = "Hello Nexer!";
+
+      return message;
+
+      // TODO [Optional] (Before Workshop):
+      //  Modify Code to return input parameter from user
+
+      // TODO (Workshop):
       //  Get account settings
       //  > Publish total lambda storage to CloudWatch
       //  > Publish current usage of lambda storage to CloudWatch

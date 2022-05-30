@@ -11,7 +11,6 @@ public class SimpleLambdaFunctionTest {
 
   @Test
   public void ShouldLogAccountSettingsTest() {
-
   }
 
 }

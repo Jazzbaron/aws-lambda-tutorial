@@ -56,157 +56,143 @@ Globals:
 
 Resources:
   #Lambda Functions
-  SimpleLamda:
+  SimpleLambda:
     Type: 'AWS::Serverless::Function'
     Properties:
       Description:
-      FunctionName: !Sub "alt-SimpleLambda"
-      Handler: "com.nexer.tutorial.functions.SimpleLambdaFunction::handleRequest"
-#      Role: !GetAtt SimpleLambdaUser.Arn
-#        HelloWorld:
-#          Type: Api
-#          Properties:
-#            Path: /helloWorld
-#            Method: get
-
+      FunctionName: !Sub "${RegionalPrefix}-${ComponentShortName}-SimpleLambda"
+      Handler: "com.nexer.tutorial.aws.functions.SimpleLambdaFunction::handleRequest"
+      CodeUri: ../../../target/aws-lambda-tutorial-1.0-SNAPSHOT.jar
+      Role: !GetAtt SimpleLambdaRole.Arn
 
   # Lambda Functions Roles #
- # SimpleLambdaUser:
- #   Type: AWS::IAM::Role
- #   Metadata:
- #     cfn_nag:
- #       rules_to_suppress:
- #         - id: W11
- #           reason: "We need * permission here to determine lambda storage"
- #   Properties:
- #     AssumeRolePolicyDocument:
- #       Statement:
- #         Action: 'sts:AssumeRole'
- #         Effect: Allow
- #         Principal:
- #           Service:
- #             - lambda.amazonaws.com
- #             - apigateway.amazonaws.com
- #     Policies:
- #       - PolicyName: inline-policy
- #         PolicyDocument:
- #           Version: "2012-10-17"
- #           Statement:
- #             - Effect: Allow
- #               Action:
- #                 - 'lambda:InvokeFunction'
- #               Resource: "*"
-# TODO:
-#Outputs:
-#  HelloWorldApi:
-#    Description: "API Gateway endpoint URL"
-#    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-#  HelloWorldFunction:
-#    Description: "Hello World Lambda Function ARN"
-#    Value: !GetAtt HelloWorldFunction.Arn
-#  HelloWorldFunctionIamRole:
-#    Description: "Implicit IAM Role created for Hello World function"
-#    Value: !GetAtt HelloWorldFunctionRole.Arn
+  SimpleLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          Action: 'sts:AssumeRole'
+          Effect: Allow
+          Principal:
+            Service:
+              - lambda.amazonaws.com
+              - apigateway.amazonaws.com
+      Policies:
+        - PolicyName: inline-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lambda:InvokeFunction'
+                Resource: "*"
+
+  SimpleLambdaDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref SimpleLambdaAPI
+  SimpleLambdaStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingBurstLimit: 10
+          ThrottlingRateLimit: 1
+          MetricsEnabled: true
+          DataTraceEnabled: true
+      RestApiId: !Ref SimpleLambdaAPI
+      DeploymentId: !Ref SimpleLambdaDeployment
+      StageName: !Sub '${RegionalPrefix}-stage'
+
+#  BasepathMapping:
+#    Type: 'AWS::ApiGateway::BasePathMapping'
+#    Properties:
+#      DomainName:
+#      Stage: !Ref SimpleLambdaStage
+#      RestApiId: !Ref SimpleLambdaAPI
 
 # DynamoDB Resource. Read more:
   # --> https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
-  myDynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      AttributeDefinitions:
-        - AttributeName: "Album"
-          AttributeType: "S"
-        - AttributeName: "Artist"
-          AttributeType: "S"
-        - AttributeName: "Sales"
-          AttributeType: "N"
-        - AttributeName: "NumberOfSongs"
-          AttributeType: "N"
-      KeySchema:
-        - AttributeName: "Album"
-          KeyType: "HASH"
-        - AttributeName: "Artist"
-          KeyType: "RANGE"
-      ProvisionedThroughput:
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      TableName: "myTableName"
-      GlobalSecondaryIndexes:
-        - IndexName: "myGSI"
-          KeySchema:
-            - AttributeName: "Sales"
-              KeyType: "HASH"
-            - AttributeName: "Artist"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Album"
-              - "NumberOfSongs"
-            ProjectionType: "INCLUDE"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
-        - IndexName: "myGSI2"
-          KeySchema:
-            - AttributeName: "NumberOfSongs"
-              KeyType: "HASH"
-            - AttributeName: "Sales"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Album"
-              - "Artist"
-            ProjectionType: "INCLUDE"
-          ProvisionedThroughput:
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
-      LocalSecondaryIndexes:
-        - IndexName: "myLSI"
-          KeySchema:
-            - AttributeName: "Album"
-              KeyType: "HASH"
-            - AttributeName: "Sales"
-              KeyType: "RANGE"
-          Projection:
-            NonKeyAttributes:
-              - "Artist"
-              - "NumberOfSongs"
-            ProjectionType: "INCLUDE"
-
-
-  #IAM Role
-  #Type: AWS::IAM::User
-  #Properties:
-  #  Groups:
-  #    - String
-  #  LoginProfile:
-  #    LoginProfile
-  #  ManagedPolicyArns:
-  #    - String
-  #  Path: String
-  #  PermissionsBoundary: String
-  #  Policies:
-  #    - Policy
-  #  Tags:
-  #    - Tag
-  #  UserName: String
+  #myDynamoDBTable:
+  #  Type: AWS::DynamoDB::Table
+  #  Properties:
+  #    AttributeDefinitions:
+  #      - AttributeName: "Album"
+  #        AttributeType: "S"
+  #      - AttributeName: "Artist"
+  #        AttributeType: "S"
+  #      - AttributeName: "Sales"
+  #        AttributeType: "N"
+  #      - AttributeName: "NumberOfSongs"
+  #        AttributeType: "N"
+  #    KeySchema:
+  #      - AttributeName: "Album"
+  #        KeyType: "HASH"
+  #      - AttributeName: "Artist"
+  #        KeyType: "RANGE"
+  #    ProvisionedThroughput:
+  #      ReadCapacityUnits: "5"
+  #      WriteCapacityUnits: "5"
+  #    TableName: "myTableName"
+  #    GlobalSecondaryIndexes:
+  #      - IndexName: "myGSI"
+  #        KeySchema:
+  #          - AttributeName: "Sales"
+  #            KeyType: "HASH"
+  #          - AttributeName: "Artist"
+  #            KeyType: "RANGE"
+  #        Projection:
+  #          NonKeyAttributes:
+  #            - "Album"
+  #            - "NumberOfSongs"
+  #          ProjectionType: "INCLUDE"
+  #        ProvisionedThroughput:
+  #          ReadCapacityUnits: "5"
+  #          WriteCapacityUnits: "5"
+  #      - IndexName: "myGSI2"
+  #        KeySchema:
+  #          - AttributeName: "NumberOfSongs"
+  #            KeyType: "HASH"
+  #          - AttributeName: "Sales"
+  #            KeyType: "RANGE"
+  #        Projection:
+  #          NonKeyAttributes:
+  #            - "Album"
+  #            - "Artist"
+  #          ProjectionType: "INCLUDE"
+  #        ProvisionedThroughput:
+  #          ReadCapacityUnits: "5"
+  #          WriteCapacityUnits: "5"
+  #    LocalSecondaryIndexes:
+  #      - IndexName: "myLSI"
+  #        KeySchema:
+  #          - AttributeName: "Album"
+  #            KeyType: "HASH"
+  #          - AttributeName: "Sales"
+  #            KeyType: "RANGE"
+  #        Projection:
+  #          NonKeyAttributes:
+  #            - "Artist"
+  #            - "NumberOfSongs"
+  #          ProjectionType: "INCLUDE"
 
   #API
-#  SimpleLambdaAPI:
-#    Type: "AWS::ApiGateway::RestApi"
-#    Properties:
-#      Name: !Sub "alt-SimpleLambdaAPI"
-#      Parameters:
-#        endpointConfigurationTypes: REGIONAL
-#      Body:
-#        Fn::Transform:
-#          Name: AWS::Include
-#          Parameters:
-#            Location: "api.yml"
+  SimpleLambdaAPI:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Name: !Sub "alt-SimpleLambdaAPI"
+      Parameters:
+        endpointConfigurationTypes: REGIONAL
+      Body:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: "api.yml"
 
-#Outputs:
-#  SimpleLambdaApiId:
-#    Description: Reference of the API Gateway in this stack
-#    Value: !Ref SimpleLambdaAPI
-#    Export:
-#      Name: !Sub '${GlobalPrefix}-${ComponentShortName}-api-id'
+Outputs:
+  SimpleLambdaApiId:
+    Description: Reference of the API Gateway in this stack
+    Value: !Ref SimpleLambdaAPI
+    Export:
+      Name: !Sub 'alt-api-id'
