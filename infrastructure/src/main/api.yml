@@ -40,7 +40,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/InvalidResponse"
 
-  /get
 components:
 #  securitySchemes:
 #    authorizer:
