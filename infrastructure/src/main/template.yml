@@ -65,6 +65,9 @@ Resources:
       CodeUri: ../../../target/aws-lambda-tutorial-1.0-SNAPSHOT.jar
       Role: !GetAtt SimpleLambdaRole.Arn
 
+  ## TODO: Create CRUDLambdaFunction
+  ## Hint: You can reuse the SimpleLambdaRole
+
   # Lambda Functions Roles #
   SimpleLambdaRole:
     Type: AWS::IAM::Role
@@ -105,77 +108,70 @@ Resources:
       DeploymentId: !Ref SimpleLambdaDeployment
       StageName: !Sub '${RegionalPrefix}-stage'
 
-#  BasepathMapping:
-#    Type: 'AWS::ApiGateway::BasePathMapping'
-#    Properties:
-#      DomainName:
-#      Stage: !Ref SimpleLambdaStage
-#      RestApiId: !Ref SimpleLambdaAPI
-
-# DynamoDB Resource. Read more:
+ #DynamoDB Resource. Read more:
   # --> https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
-  #myDynamoDBTable:
-  #  Type: AWS::DynamoDB::Table
-  #  Properties:
-  #    AttributeDefinitions:
-  #      - AttributeName: "Album"
-  #        AttributeType: "S"
-  #      - AttributeName: "Artist"
-  #        AttributeType: "S"
-  #      - AttributeName: "Sales"
-  #        AttributeType: "N"
-  #      - AttributeName: "NumberOfSongs"
-  #        AttributeType: "N"
-  #    KeySchema:
-  #      - AttributeName: "Album"
-  #        KeyType: "HASH"
-  #      - AttributeName: "Artist"
-  #        KeyType: "RANGE"
-  #    ProvisionedThroughput:
-  #      ReadCapacityUnits: "5"
-  #      WriteCapacityUnits: "5"
-  #    TableName: "myTableName"
-  #    GlobalSecondaryIndexes:
-  #      - IndexName: "myGSI"
-  #        KeySchema:
-  #          - AttributeName: "Sales"
-  #            KeyType: "HASH"
-  #          - AttributeName: "Artist"
-  #            KeyType: "RANGE"
-  #        Projection:
-  #          NonKeyAttributes:
-  #            - "Album"
-  #            - "NumberOfSongs"
-  #          ProjectionType: "INCLUDE"
-  #        ProvisionedThroughput:
-  #          ReadCapacityUnits: "5"
-  #          WriteCapacityUnits: "5"
-  #      - IndexName: "myGSI2"
-  #        KeySchema:
-  #          - AttributeName: "NumberOfSongs"
-  #            KeyType: "HASH"
-  #          - AttributeName: "Sales"
-  #            KeyType: "RANGE"
-  #        Projection:
-  #          NonKeyAttributes:
-  #            - "Album"
-  #            - "Artist"
-  #          ProjectionType: "INCLUDE"
-  #        ProvisionedThroughput:
-  #          ReadCapacityUnits: "5"
-  #          WriteCapacityUnits: "5"
-  #    LocalSecondaryIndexes:
-  #      - IndexName: "myLSI"
-  #        KeySchema:
-  #          - AttributeName: "Album"
-  #            KeyType: "HASH"
-  #          - AttributeName: "Sales"
-  #            KeyType: "RANGE"
-  #        Projection:
-  #          NonKeyAttributes:
-  #            - "Artist"
-  #            - "NumberOfSongs"
-  #          ProjectionType: "INCLUDE"
+  myDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "Album"
+          AttributeType: "S"
+        - AttributeName: "Artist"
+          AttributeType: "S"
+        - AttributeName: "Sales"
+          AttributeType: "N"
+        - AttributeName: "NumberOfSongs"
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: "Album"
+          KeyType: "HASH"
+        - AttributeName: "Artist"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "myTableName"
+      GlobalSecondaryIndexes:
+        - IndexName: "myGSI"
+          KeySchema:
+            - AttributeName: "Sales"
+              KeyType: "HASH"
+            - AttributeName: "Artist"
+              KeyType: "RANGE"
+          Projection:
+            NonKeyAttributes:
+              - "Album"
+              - "NumberOfSongs"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput:
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+        - IndexName: "myGSI2"
+          KeySchema:
+            - AttributeName: "NumberOfSongs"
+              KeyType: "HASH"
+            - AttributeName: "Sales"
+              KeyType: "RANGE"
+          Projection:
+            NonKeyAttributes:
+              - "Album"
+              - "Artist"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput:
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+      LocalSecondaryIndexes:
+        - IndexName: "myLSI"
+          KeySchema:
+            - AttributeName: "Album"
+              KeyType: "HASH"
+            - AttributeName: "Sales"
+              KeyType: "RANGE"
+          Projection:
+            NonKeyAttributes:
+              - "Artist"
+              - "NumberOfSongs"
+            ProjectionType: "INCLUDE"
 
   #API
   SimpleLambdaAPI:
