@@ -14,6 +14,8 @@ import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.apache.ApacheHttpClient;
 
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+
 public class CRUDLambdaFunction implements RequestHandler<Void, String> {
     private static final Logger LOG = LoggerFactory.getLogger(SimpleLambdaFunction.class);
     private static final SdkHttpClient httpClient = ApacheHttpClient.builder().build();
@@ -24,6 +26,11 @@ public class CRUDLambdaFunction implements RequestHandler<Void, String> {
         if (ddb == null) {
             ddb = AmazonDynamoDBClientBuilder.defaultClient();
         }
+
+        // For querying database, initialize dynamoDB client:
+        // DynamoDB dynamoDB = new DynamoDB(ddb);
+        // dynamoDB.getTable("");
+        // ...
 
         try {
 
