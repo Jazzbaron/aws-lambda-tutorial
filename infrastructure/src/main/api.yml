@@ -39,26 +39,73 @@ paths:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/InvalidResponse"
+  /totaltableinuse:
+    post:
+      summary: Returns the total amount of tables in your account
+      description: Returns the total amount of tables in your account. This showcases that the amazon DB client works.
 
+      responses:
+        '200':
+          description: "200 OK Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CRUDLambda"
+        '400':
+          description: "Bad request"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/InvalidResponse"
+        '500':
+          description: "Internal server error"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/InvalidResponse"
+  /addSQSmessage:
+    post:
+      summary: Puts a message on an SQS queue
+      description: Triggers lambda that puts a message on an SQS queue
+
+      responses:
+        '200':
+          description: "200 OK Response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AddSQSMessageLambda"
+        '400':
+          description: "Bad request"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/InvalidResponse"
+        '500':
+          description: "Internal server error"
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/InvalidResponse"
 components:
-#  securitySchemes:
-#    authorizer:
-#      type: "apiKey"
-#      name: "Authorization"
-#      in: "header"
-#      x-amazon-apigateway-authtype: "custom"
-#      x-amazon-apigateway-authorizer:
-#        type: "token"
-#        identitySource: method.request.header.Authorization
-#        authorizerCredentials:
-#          Fn::GetAtt: Authorizer.Outputs.AuthorizerRole
-#        authorizerUri:
-#          Fn::Sub:
-#            - 'arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations'
-#            - lambdaArn:
-#                Fn::GetAtt:
-#                  Authorizer.Outputs.AuthorizerArn
-#        authorizerResultTtlInSeconds: 0
+  #  securitySchemes:
+  #    authorizer:
+  #      type: "apiKey"
+  #      name: "Authorization"
+  #      in: "header"
+  #      x-amazon-apigateway-authtype: "custom"
+  #      x-amazon-apigateway-authorizer:
+  #        type: "token"
+  #        identitySource: method.request.header.Authorization
+  #        authorizerCredentials:
+  #          Fn::GetAtt: Authorizer.Outputs.AuthorizerRole
+  #        authorizerUri:
+  #          Fn::Sub:
+  #            - 'arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations'
+  #            - lambdaArn:
+  #                Fn::GetAtt:
+  #                  Authorizer.Outputs.AuthorizerArn
+  #        authorizerResultTtlInSeconds: 0
   parameters:
     InvalidResponse:
       type: object

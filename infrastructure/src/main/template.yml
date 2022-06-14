@@ -67,6 +67,72 @@ Resources:
 
   ## TODO: Create CRUDLambdaFunction
   ## Hint: You can reuse the SimpleLambdaRole
+  CRUDLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Description:
+      FunctionName: !Sub "${RegionalPrefix}-${ComponentShortName}-CrudLambda"
+      Handler: "com.nexer.tutorial.aws.functions.CRUDLambdaFunction::handleRequest"
+      CodeUri: ../../../target/aws-lambda-tutorial-1.0-SNAPSHOT.jar
+      Role: !GetAtt SimpleLambdaRole.Arn
+
+  ## TODO: Create addMessageSQSLambda
+  AddSQSMessageLambda:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Description:
+      FunctionName: !Sub "${RegionalPrefix}-${ComponentShortName}-AddSQSMessageLambda"
+      Handler: "com.nexer.tutorial.aws.functions.AddSQSMessageLambdaFunction::handleRequest"
+      CodeUri: ../../../target/aws-lambda-tutorial-1.0-SNAPSHOT.jar
+      Role: !GetAtt SimpleLambdaRole.Arn
+
+  #SQS Queue
+  AWStutorialQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Sub "${RegionalPrefix}-${ComponentShortName}-aws-tutorial-queue"
+      MessageRetentionPeriod: 259200 #3 days in seconds
+      RedrivePolicy:
+        maxReceiveCount: 16 # 48 / 3 (two days, every three hours)
+        deadLetterTargetArn:
+          Fn::GetAtt:
+            - "AWStutorialQueueDLQueue"
+            - "Arn"
+      Tags:
+        - Key: "queueAlias"
+          Value: "AWStutorialQueue"
+
+  #SQS DLQ Queue
+  AWStutorialQueueDLQueue:
+    Type: "AWS::SQS::Queue"
+    Properties:
+      QueueName: !Sub "${RegionalPrefix}-${ComponentShortName}-aws-tutorial-dlqueue"
+      MessageRetentionPeriod: 1209600 # 14 days - longest period allowed.
+      Tags:
+        - Key: "queueAlias"
+          Value: "AWStutorialQueueDLQueue"
+        - Key: "queueType"
+          Value: "DeadLetterQueue"
+
+  ## Work in progress
+  tutorialsqspolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      PolicyDocument:
+        Id: TutorialQueuePolicy
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Allow-User-SendMessage
+            Effect: Allow
+            Principal:
+              AWS: "*"
+            Action:
+              - sqs:SendMessage
+              - sqs:GetQueueAttributes
+            Resource: "*"
+      Queues:
+        - https://sqs.eu-north-1.amazonaws.com/<your_queue_arn>/tutorial-eu-alt-aws-tutorial-queue
+        - !Ref AWStutorialQueue
 
   # Lambda Functions Roles #
   SimpleLambdaRole:
@@ -108,7 +174,7 @@ Resources:
       DeploymentId: !Ref SimpleLambdaDeployment
       StageName: !Sub '${RegionalPrefix}-stage'
 
- #DynamoDB Resource. Read more:
+  #DynamoDB Resource. Read more:
   # --> https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
   myDynamoDBTable:
     Type: AWS::DynamoDB::Table
